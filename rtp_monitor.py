@@ -21,9 +21,8 @@ except Exception as e:
     # In un ambiente di produzione, potresti voler uscire o ritentare qui.
     
 # --- FUNZIONI ---
-
 def get_rtp():
-    """Estrae il valore RTP dal tag specifico del Bet Tracker Widget."""
+    """Estrae il valore RTP usando una regex robusta sul testo del widget."""
     url = 'https://www.casino.org/casinoscores/it/crazy-time/'
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     
@@ -32,40 +31,35 @@ def get_rtp():
     try:
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
-            print(f"Errore HTTP: {response.status_code}")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Errore HTTP: {response.status_code}")
             return None
 
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # 1. Trova il contenitore principale del Bet Tracker
-        # Usiamo l'attributo data-testid="bet-tracker-widget-header-stats"
-        # perché è meno probabile che l'intero blocco cambi.
+        # 1. Trova il contenitore degli stats, usando il data-testid fisso
         header_stats = soup.find('span', {'data-testid': 'bet-tracker-widget-header-stats'})
         
         if header_stats:
-            # 2. Cerca il tag <p> che contiene il testo "RTP XX.XX%" al suo interno
-            # Si concentra sul tag p che ha la classe 'font-bold p-0 m-0 flex text-xs xxs:text-[15px]'
-            rtp_element = header_stats.find('p', class_='font-bold p-0 m-0 flex text-xs xxs:text-[15px]')
+            # 2. Prendi tutto il testo dal contenitore
+            text = header_stats.get_text(strip=True)
             
-            if rtp_element:
-                text = rtp_element.get_text(strip=True)
-                # La regex cerca un numero (con virgola o punto decimale) seguito da %
-                rtp_match = re.search(r'(\d+[.,]?\d*)%', text)
+            # 3. Utilizza la regex per cercare la stringa "RTP" seguita da un numero con %
+            # Pattern: (RTP\s*) -> cerca "RTP "
+            # (\d+[.,]?\d*) -> cattura il numero (es. 98.63)
+            # % -> seguito dal simbolo di percentuale
+            rtp_match = re.search(r'RTP\s*(\d+[.,]?\d*)%', text)
 
-                if rtp_match:
-                    # Sostituisce la virgola con il punto e converte in float
-                    rtp_value_str = rtp_match.group(1).replace(',', '.')
-                    rtp_value = float(rtp_value_str)
-                    print(f"[{datetime.now().strftime('%H:%M:%S')}] ✅ RTP trovato: {rtp_value}%")
-                    return rtp_value
-                else:
-                    print(f"[{datetime.now().strftime('%H:%M:%S')}] Regex non ha trovato il pattern RTP nel testo: {text}")
-                    return None
+            if rtp_match:
+                # Il gruppo 1 contiene solo il numero
+                rtp_value_str = rtp_match.group(1).replace(',', '.')
+                rtp_value = float(rtp_value_str)
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] ✅ RTP trovato con regex: {rtp_value}%")
+                return rtp_value
             else:
-                print(f"[{datetime.now().strftime('%H:%M:%S')}] Elemento <p> RTP specifico non trovato all'interno del widget header.")
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Regex fallita nel testo: {text}")
                 return None
         else:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Elemento HTML 'bet-tracker-widget-header-stats' non trovato.")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Elemento HTML 'bet-tracker-widget-header-stats' non trovato (Contenitore principale mancante).")
             return None
             
     except requests.exceptions.RequestException as e:
@@ -105,4 +99,5 @@ print("Prossimo controllo tra 5 minuti...")
 while True:
     schedule.run_pending()
     time.sleep(1)
+
 
