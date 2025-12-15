@@ -80,7 +80,7 @@ def check_alert():
     rtp = get_rtp()
     
     if rtp is not None:
-        if rtp < 68.0:
+        if rtp < 105.0:
             message = f"🚨 **ALERT! RTP CRAZY TIME SOTTO 68%**! Attuale: **{rtp}%** - {datetime.now().strftime('%H:%M')}"
             try:
                 # Se l'inizializzazione del bot è fallita, questa linea fallirà.
@@ -105,3 +105,4 @@ print("Prossimo controllo tra 5 minuti...")
 while True:
     schedule.run_pending()
     time.sleep(1)
+
