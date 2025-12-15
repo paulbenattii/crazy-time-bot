@@ -89,7 +89,7 @@ def check_alert():
     rtp = get_rtp()
     
     if rtp is not None:
-        if rtp < 68:
+        if rtp < 105:
             message = f"🚨 RTP CRAZY TIME SOTTO 68%! **{rtp}%** - {datetime.now().strftime('%H:%M')}"
             try:
                 # Uso parse_mode='Markdown' per enfatizzare l'RTP
@@ -105,7 +105,7 @@ def check_alert():
 # --- SCHEDULAZIONE E AVVIO ---
 
 # Ogni 5 minuti
-schedule.every(5).minutes.do(check_alert)
+schedule.every(1).minutes.do(check_alert)
 print("--- Monitoraggio RTP avviato ---")
 print(f"Bot Token: {BOT_TOKEN[:5]}...{BOT_TOKEN[-5:]}") # Stampa parziale per sicurezza
 print(f"Chat ID: {CHAT_ID}")
@@ -114,3 +114,4 @@ print(f"Chat ID: {CHAT_ID}")
 while True:
     schedule.run_pending()
     time.sleep(1)
+
