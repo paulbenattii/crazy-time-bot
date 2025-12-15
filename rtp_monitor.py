@@ -10,7 +10,7 @@ import re
 # Legge le variabili d'ambiente di Railway
 BOT_TOKEN = os.getenv("7969789752:AAFxPcu7Ni1r0dRKA796-9F_BMLv9P59fbA")
 CHAT_ID = os.getenv("-4925344956")
-bot = telegram.Bot(token=BOT_TOKEN)
+bot = telegram.Bot(token=7969789752:AAFxPcu7Ni1r0dRKA796-9F_BMLv9P59fbA)
 
 def get_rtp():
     url = 'https://www.casino.org/casinoscores/it/crazy-time/'
@@ -45,3 +45,4 @@ print("Monitoraggio avviato...")
 while True:
     schedule.run_pending()
     time.sleep(1)
+
